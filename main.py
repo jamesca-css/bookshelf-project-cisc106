@@ -40,6 +40,7 @@ def add_book_page(state: State) -> Page:
     TextBox("author"),
     TextBox("length"),
     TextBox("rating"),
+    TextBox("filepath"),
     Button("Add", add_book)])
 @route 
 def safe(state: State) -> Page:
@@ -85,7 +86,4 @@ def add_to_safe(state: State) -> Page:
 def remove_from_safe(state: State) -> Page:
     return inside_safe(state)
 
-
-assert_equal(index(State()), Page(State(), ["Hello World!"]))
-
-start_server(State())
+start_server(State([4, 2, 7], [], False, [], [], ""))
