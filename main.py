@@ -13,17 +13,16 @@ class Book:
     title:str
     author:str
     length:int
-    genre:str
     rating:float
     filepath:str
     
 @dataclass
 class State:
-    safe_key:[int]
-    safe_attempt:[int]
+    safe_key:list[int]
+    safe_attempt:list[int]
     darkmode:bool
-    shelf_books:[book]
-    safe_books:[book]
+    shelf_books:list[Book]
+    safe_books:list[Book]
     message:str
 
 
@@ -50,19 +49,20 @@ def open_book(state: State) -> Page:
 #Routes w/o pages
 @route 
 def toggle_darkmode(state: State) ->Page:
+    state.darkmode = not state.darkmode
     return index(state)
 @route
-def add_book(state: State) -> Page:
+def add_book(state: State, title:str, author:str, length:int, rating:float, filepath:str ) -> Page:
     return shelf(state)
 @route 
-def remove_book(state: State) -> Page:
+def remove_book(state: State, title:str) -> Page:
     return shelf(state)
 @route
 def sort_books(state: State) -> Page:
     return shelf(state)
 @route 
-def input_attempt(state: State) -> Page:
-    if state.safe_attempt.len() >= 3:
+def input_attempt(state: State, digit:int) -> Page:
+    if len(state.safe_attempt) >= 3:
         return open_safe(state)
     else:
         return safe(state)
@@ -76,7 +76,7 @@ def open_safe(state: State) -> Page:
 def add_to_safe(state: State) -> Page:
     return inside_safe(state)
 @route
-def remove_from_state(state: State) -> Page:
+def remove_from_safe(state: State) -> Page:
     return inside_safe(state)
 
 
