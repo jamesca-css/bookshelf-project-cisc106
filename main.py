@@ -4,9 +4,9 @@ from dataclasses import dataclass
 
 
 
-hide_debug_information()
-set_website_title("Your Drafter Website")
-set_website_framed(False)
+#hide_debug_information()
+#set_website_title("Your Drafter Website")
+#set_website_framed(False)
 
 @dataclass
 class Book:
@@ -32,7 +32,7 @@ def show(state: State, content:list) -> Page:
     state.message = ""
     if state.darkmode:
         return Page(state, [Div(msg, *content, style_background_color="black", style_color="white")])
-    return Page(state, [Div(msg, *content])
+    return Page(state, [Div(msg, *content)])
 def find_book(books:list[Book], title: str) -> Book | None:
     """finds the title of the requested book and returns it if it exists, otherewise None"""
     for book in books:
