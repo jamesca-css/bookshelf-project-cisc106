@@ -27,7 +27,7 @@ class State:
     message:str
 
 
-
+#pages
 @route
 def index(state: State) -> Page:
     return Page(state, ["Hello World!"])
@@ -40,6 +40,45 @@ def add_book_page(state: State) -> Page:
 @route 
 def safe(state: State) -> Page:
     return Page(state, [])
+@route
+def inside_safe(state: State) -> Page:
+    return Page(state, [])
+@route
+def open_book(state: State) -> Page:
+    return Page(state, [])
+
+#Routes w/o pages
+@route 
+def toggle_darkmode(state: State) ->Page:
+    return index(state)
+@route
+def add_book(state: State) -> Page:
+    return shelf(state)
+@route 
+def remove_book(state: State) -> Page:
+    return shelf(state)
+@route
+def sort_books(state: State) -> Page:
+    return shelf(state)
+@route 
+def input_attempt(state: State) -> Page:
+    if state.safe_attempt.len() >= 3:
+        return open_safe(state)
+    else:
+        return safe(state)
+@route
+def open_safe(state: State) -> Page:
+    if True:
+        return inside_safe(state)
+    else:
+        return safe(state)
+@route 
+def add_to_safe(state: State) -> Page:
+    return inside_safe(state)
+@route
+def remove_from_state(state: State) -> Page:
+    return inside_safe(state)
+
 
 assert_equal(index(State()), Page(State(), ["Hello World!"]))
 
