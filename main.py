@@ -76,13 +76,42 @@ def add_book_page(state: State) -> Page:
     ])
 @route 
 def safe(state: State) -> Page:
-    return Page(state, [])
+    dots = "●" * len(state.safe_attempt) + "○" * (3 - len(state.safe_attempt))
+    return Page(state, [
+        Header("Safe"),
+        dots,
+        Textbox("digit"),
+        Button("Enter number", input_attempt),
+        Button("Back", index),
+    ])
 @route
 def inside_safe(state: State) -> Page:
-    return Page(state, [])
+    content = [Header("Inside the Safe")]
+    for book in state.safe_books:
+        content.append(book.title)
+        content.append(Button("Open", open_book, [Argument("title", book.title)]))
+        content.append(Button("Take out", remove_from_safe, [Argument("title", book.title)]))
+    if len(state.shelf_books) > 0:
+        content.append(SelectBox("title", [b.title for b in state.shelf_books]))
+        content.append(Button("Put in safe", add_to_safe))
+    conntent.append(Button("Back", index))
+    return Page(state, content)
 @route
-def open_book(state: State) -> Page:
-    return Page(state, [])
+def open_book(state: State, title:str) -> Page:
+    book = find_book(state.shelf_books, title)
+    if book is None:
+        book = find_book(state.safe_books, title)
+    text = "(no text!)"
+    try:
+        with open(book.filepath) as f:
+            text = f.read()
+    except OSError:
+        text = "Could not read file!"
+    return Page(state, [
+        Header(book.title),
+        text,
+        Button("Back", shelf),
+    ])
 
 #Routes w/o pages
 @route 
@@ -91,9 +120,20 @@ def toggle_darkmode(state: State) ->Page:
     return index(state)
 @route
 def add_book(state: State, title:str, author:str, length:int, rating:float, filepath:str ) -> Page:
+    if title == "" or author == "":
+        state.message = "Title and author are required!"
+        return add_book_page(state)
+    if not length.isdigit():
+        state.message = "Length must be a whole number!"
+        return add_book_page(state)
+    if find_book(state.shelf_books + state.safe_books, title) is not None:
+        state.message = "Title aready exists!"
+        return add_book_page(state)
+    state.shelf_books.append(Book(title, author, int(length), float(rating), filepath))
     return shelf(state)
 @route 
 def remove_book(state: State, title:str) -> Page:
+    state.shelf_books.remove(find_book(state.shelf_books, title))
     return shelf(state)
 @route
 def sort_books(state: State) -> Page:
