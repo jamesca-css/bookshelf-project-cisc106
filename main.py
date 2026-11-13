@@ -24,24 +24,56 @@ class State:
     shelf_books:list[Book]
     safe_books:list[Book]
     message:str
-
+    
+#helper functions
+def show(state: State, content:list) -> Page:
+    """puts the message at the top and does the darkmode check."""
+    msg = state.message
+    state.message = ""
+    if state.darkmode:
+        return Page(state, [Div(msg, *content, style_background_color="black", style_color="white")])
+    return Page(state, [Div(msg, *content])
+def find_book(books:list[Book], title: str) -> Book | None:
+    """finds the title of the requested book and returns it if it exists, otherewise None"""
+    for book in books:
+        if book.title == title:
+            return book
+    return None
 
 #pages
 @route
 def index(state: State) -> Page:
-    return Page(state, ["Hello World!"])
+    return Page(state, [Header("The Room"),
+                       Button("Toggle dark mode", toggle_darkmode),
+                       Button("Go to shelf", shelf),
+                       Button("Go to safe", safe),
+                       ])
 @route
 def shelf(state: State) -> Page:
-    return Page(state, [])
+    content = [Header("Shelf")]
+    for book in state.shelf_books:
+        content.append(book.title + " by " + book.author + " (" + str(book.length) + " pages, " + str(book.rating) + " stars)")
+        content.append(Button("Open", open_book, [Argument("title", book.title)]))
+        content.append(Button("Remove", remove_book, [Argument("title", book.title)]))
+        if len(state.shelf_books) > 1:
+            content.append(Selectbox("sort_by", ["title","author","length","rating"]))
+            content.append(Checkbox("Reverse sort"))
+            content.append(Button("Sort", sort_books))
+        content.append(Button("Add a book", add_book_page))
+        content.append(Button("Back", index))
+    return Page(state, content)
 @route 
 def add_book_page(state: State) -> Page:
-    
-    return Page(state, [TextBox("title"),
-    TextBox("author"),
-    TextBox("length"),
-    TextBox("rating"),
-    TextBox("filepath"),
-    Button("Add", add_book)])
+    return Page(state, [
+        Header("Add a book"),
+        "Title", TextBox("title"),
+        "Author", TextBox("author"),
+        "Length", TextBox("length"),
+        "Rating (0-5 float)", TextBox("rating"),
+        "Text file path", TextBox("filepath"),
+        Button("Add", add_book),
+        Button("Back", shelf),
+    ])
 @route 
 def safe(state: State) -> Page:
     return Page(state, [])
