@@ -140,22 +140,31 @@ def sort_books(state: State) -> Page:
     return shelf(state)
 @route 
 def input_attempt(state: State, digit:int) -> Page:
-    # characters to display safe progress ● ○
+    if digit.isdigit():
+        state.safe_attempt.append(int(digit))
     if len(state.safe_attempt) >= 3:
         return open_safe(state)
-    else:
-        return safe(state)
+    return safe(state)
 @route
 def open_safe(state: State) -> Page:
-    if True:
+    correct = state.safe_attempt == state.safe_key
+    state.safe_attempt = []
+    if correct:
         return inside_safe(state)
     else:
+        state.message = "Wrong combination."
         return safe(state)
 @route 
-def add_to_safe(state: State) -> Page:
+def add_to_safe(state: State, title:str) -> Page:
+    book = find_book(state.shelf_books, title)
+    state.shelf_books.remove(book)
+    state.safe_books.append(book)
     return inside_safe(state)
 @route
 def remove_from_safe(state: State) -> Page:
+    book = find_book(state.safe_books, title)
+    state.safe_books.remove(book)
+    state.shelf_books.append(book)
     return inside_safe(state)
-
+assert_equal(toggle_darkmode(State([4, 2, 7], [], False, [], [], "")).state.darkmode, True)
 start_server(State([4, 2, 7], [], False, [], [], ""))
