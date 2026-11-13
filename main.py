@@ -35,7 +35,12 @@ def shelf(state: State) -> Page:
     return Page(state, [])
 @route 
 def add_book_page(state: State) -> Page:
-    return Page(state, [])
+    
+    return Page(state, [TextBox("title"),
+    TextBox("author"),
+    TextBox("length"),
+    TextBox("rating"),
+    Button("Add", add_book)])
 @route 
 def safe(state: State) -> Page:
     return Page(state, [])
@@ -62,6 +67,7 @@ def sort_books(state: State) -> Page:
     return shelf(state)
 @route 
 def input_attempt(state: State, digit:int) -> Page:
+    # characters to display safe progress ● ○
     if len(state.safe_attempt) >= 3:
         return open_safe(state)
     else:
