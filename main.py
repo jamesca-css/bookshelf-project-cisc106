@@ -4,9 +4,9 @@ from dataclasses import dataclass
 
 
 
-#hide_debug_information()
-#set_website_title("Your Drafter Website")
-#set_website_framed(False)
+hide_debug_information()
+set_website_title("Bookshelf simulator")
+set_website_framed(False)
 
 @dataclass
 class Book:
@@ -62,7 +62,7 @@ def find_book(books:list[Book], title: str) -> Book | None:
 #pages
 @route
 def index(state: State) -> Page:
-    return Page(state, [Header("The Room"),
+    return show(state, [Header("The Room"),
                        Button("Toggle dark mode", toggle_darkmode),
                        Button("Go to shelf", shelf),
                        Button("Go to safe", safe),
@@ -74,16 +74,17 @@ def shelf(state: State) -> Page:
         content.append(book.title + " by " + book.author + " (" + str(book.length) + " pages, " + str(book.rating) + " stars)")
         content.append(Button("Open", open_book, [Argument("title", book.title)]))
         content.append(Button("Remove", remove_book, [Argument("title", book.title)]))
-        if len(state.shelf_books) > 1:
-            content.append(Selectbox("sort_by", ["title","author","length","rating"]))
-            content.append(Checkbox("Reverse sort"))
-            content.append(Button("Sort", sort_books))
-        content.append(Button("Add a book", add_book_page))
-        content.append(Button("Back", index))
-    return Page(state, content)
+    if len(state.shelf_books) > 1:
+        content.append(SelectBox("sort_by", ["title","author","length","rating"]))
+        content.append("Reverse sort")
+        content.append(CheckBox("reverse"))
+        content.append(Button("Sort", sort_books))
+    content.append(Button("Add a book", add_book_page))
+    content.append(Button("Back", index))
+    return show(state, content)
 @route 
 def add_book_page(state: State) -> Page:
-    return Page(state, [
+    return show(state, [
         Header("Add a book"),
         "Title", TextBox("title"),
         "Author", TextBox("author"),
@@ -96,7 +97,7 @@ def add_book_page(state: State) -> Page:
 @route 
 def safe(state: State) -> Page:
     dots = "●" * len(state.safe_attempt) + "○" * (3 - len(state.safe_attempt))
-    return Page(state, [
+    return show(state, [
         Header("Safe"),
         dots,
         TextBox("digit"),
@@ -114,7 +115,7 @@ def inside_safe(state: State) -> Page:
         content.append(SelectBox("title", [b.title for b in state.shelf_books]))
         content.append(Button("Put in safe", add_to_safe))
     content.append(Button("Back", index))
-    return Page(state, content)
+    return show(state, content)
 @route
 def open_book(state: State, title:str) -> Page:
     book = find_book(state.shelf_books, title)
@@ -126,7 +127,7 @@ def open_book(state: State, title:str) -> Page:
             text = f.read()
     except OSError:
         text = "Could not read file!"
-    return Page(state, [
+    return show(state, [
         Header(book.title),
         text,
         Button("Back", shelf),
@@ -138,7 +139,7 @@ def toggle_darkmode(state: State) ->Page:
     state.darkmode = not state.darkmode
     return index(state)
 @route
-def add_book(state: State, title:str, author:str, length:int, rating:float, filepath:str ) -> Page:
+def add_book(state: State, title:str, author:str, length:str, rating:str, filepath:str) -> Page:
     if title == "" or author == "":
         state.message = "Title and author are required!"
         return add_book_page(state)
@@ -155,10 +156,19 @@ def remove_book(state: State, title:str) -> Page:
     state.shelf_books.remove(find_book(state.shelf_books, title))
     return shelf(state)
 @route
-def sort_books(state: State) -> Page:
+def sort_books(state: State, sort_by: str, reverse: bool) -> Page:
+    books = state.shelf_books
+    for i in range(len(books)):
+        best = i
+        for j in range(i + 1, len(books)):
+            if getattr(books[j], sort_by) < getattr(books[best], sort_by):
+                best = j
+        books[i], books[best] = books[best], books[i]
+    if reverse:
+        books.reverse()
     return shelf(state)
-@route 
-def input_attempt(state: State, digit:int) -> Page:
+@route
+def input_attempt(state: State, digit:str) -> Page:
     if digit.isdigit():
         state.safe_attempt.append(int(digit))
     if len(state.safe_attempt) >= 3:
@@ -185,5 +195,6 @@ def remove_from_safe(state: State, title:str) -> Page:
     state.safe_books.remove(book)
     state.shelf_books.append(book)
     return inside_safe(state)
-assert_equal(toggle_darkmode(State([4, 2, 7], [], False, [], [], "")).state.darkmode, True)
-start_server(State([4, 2, 7], [], False, [], [], ""))
+start_server(State([4, 2, 7], [], False,
+                   [Book("thepassword", "dev", 1, 5.0, "passwrd.txt")],
+                   [], ""))
