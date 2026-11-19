@@ -5,27 +5,8 @@ from dataclasses import dataclass
 
 
 hide_debug_information()
-set_website_title("Bookshelf simulator")
+set_website_title("Your Drafter Website")
 set_website_framed(False)
-
-@dataclass
-class Book:
-    title:str
-    author:str
-    length:int
-    rating:float
-    filepath:str
-    
-@dataclass
-class State:from bakery import assert_equal
-from drafter import *
-from dataclasses import dataclass
-
-
-
-#hide_debug_information()
-#set_website_title("Your Drafter Website")
-#set_website_framed(False)
 
 @dataclass
 class Book:
